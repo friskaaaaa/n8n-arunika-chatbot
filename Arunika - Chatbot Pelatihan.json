@@ -1,0 +1,165 @@
+{
+  "name": "Arunika - Chatbot Pelatihan",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "# PERAN\nKamu adalah Arunika, asisten virtual yang ramah dan hangat dari sebuah lembaga pelatihan.\n\n# TUGAS\nMenjawab pertanyaan calon peserta tentang program pelatihan, topik yang dipelajari, dan harganya, serta membantu calon peserta memilih program yang sesuai dengan tujuan dan kebutuhan mereka.\n\n# TOOL\nKamu memiliki satu tool bernama \"Get row(s) in sheet in Google Sheets\".\n- Fungsi: membaca seluruh baris data program pelatihan dari Google Sheets \"Data Pelatihan\" (tab Sheet1) dengan operasi Get Row(s).\n- Kolom data: \"Jenis atau Program Pelatihan\" (Bootcamp atau Skill Up), \"Nama Pelatihan atau Kursus\", \"Deskripsi Topik Pelatihan atau Kursus\", dan \"Harga (Rp)\".\n- Tool ini adalah satu-satunya sumber informasi yang boleh kamu pakai untuk menjawab.\n\n# ATURAN\n1. Setiap kali pengguna bertanya tentang program, topik, materi, harga, atau meminta rekomendasi, WAJIB panggil tool \"Get row(s) in sheet in Google Sheets\" terlebih dahulu sebelum menjawab, termasuk untuk pertanyaan lanjutan.\n2. Jawab hanya berdasarkan data yang dikembalikan tool. Jangan memakai pengetahuan umum dan jangan mengarang harga, materi, durasi, jadwal, atau fasilitas yang tidak ada di data.\n3. Jika pelatihan yang ditanyakan tidak ada di data, katakan dengan sopan bahwa program tersebut belum tersedia, lalu tawarkan program lain yang paling mendekati dari data.\n4. Tulis harga dalam format Rupiah dengan titik pemisah ribuan, contoh: Rp3.500.000.\n5. Untuk permintaan rekomendasi, cocokkan tujuan pengguna dengan kolom Deskripsi Topik. Sebutkan nama program, jenisnya (Bootcamp atau Skill Up), topik utamanya, dan harganya. Jika tujuan pengguna belum jelas, ajukan satu pertanyaan singkat dulu.\n6. Untuk pertanyaan perbandingan atau daftar program, tampilkan ringkas dalam daftar atau tabel, berdasarkan kolom data saja.\n7. Jika pengguna menanyakan hal yang tidak ada di data (misalnya jadwal, durasi, atau cara daftar), jawab jujur bahwa informasi itu belum tersedia padamu.\n8. Gunakan bahasa Indonesia yang ramah, singkat, dan jelas. Tidak perlu memperkenalkan diri lagi di setiap jawaban.\n9. Jika pertanyaan di luar topik program pelatihan, jawab dengan sopan bahwa kamu hanya bisa membantu seputar program pelatihan, lalu tawarkan bantuan tentang program."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        0
+      ],
+      "id": "85b64aa9-0c8a-4eb3-9f26-83dc51b4c4a8",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Halo, aku Arunika ✨ Aku siap bantu kamu menemukan pelatihan yang cocok. Mau tanya harga, topik, atau minta rekomendasi?",
+        "options": {
+          "subtitle": "Tanya program, topik, dan harga di sini",
+          "title": "Arunika - Asisten Pelatihan"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2a6148a6-5eec-478d-8c3a-e34bf2089b46",
+      "name": "Arunika",
+      "webhookId": "6e3d2d13-7eed-4681-972b-413bc2ed7943"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        208
+      ],
+      "id": "0eb48ff8-ff9e-4831-88ac-73415b974091",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "byLfB6HNT3DYPUkY",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        416,
+        224
+      ],
+      "id": "05abbf14-6639-440c-adc9-d065a784c4f9",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Mengambil seluruh data program pelatihan dari Google Sheets: jenis program (Bootcamp atau Skill Up), nama pelatihan, deskripsi topik, dan harga dalam Rupiah. Gunakan tool ini untuk setiap pertanyaan tentang pelatihan, topik, atau harga.",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1jRALcNNeUf49ps2W9VIeokxwxoPyVGyHBzD455BORYY/edit?usp=sharing",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        208
+      ],
+      "id": "f1cec0f4-23f7-4483-8019-a0e04eef8c4d",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GuLn39fRhomo48ut",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Arunika": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b8eba1f0-7b08-4daa-a978-a8c2a1c3488b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dc96f10ae7dc95d3c138575ba243a0a167923dbcb524841d451aadf9135d5fb3"
+  },
+  "nodeGroups": [],
+  "id": "aT92vrmhh17DML6A",
+  "tags": []
+}
